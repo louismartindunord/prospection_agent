@@ -31,3 +31,10 @@ CREATE TABLE IF NOT EXISTS Mail (
     FOREIGN KEY (prospect_id) REFERENCES Prospect(id),
     FOREIGN KEY (campaign_id) REFERENCES Campaign(id)
 );
+
+CREATE TABLE IF NOT EXISTS User_infos(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    firstname TEXT, 
+    lastname TEXT, 
+    email TEXT NOT NULL UNIQUE 
+    );
