@@ -1,6 +1,6 @@
 import streamlit as st
 from email_validator import validate_email, EmailNotValidError
-from utils.connection import create_connection
+from utils.connection import create_connection, return_api_key
 import openai
 import sqlite3
 
@@ -14,6 +14,25 @@ def is_user_information_form_active():
         return True
     else:
         return False
+
+
+def return_missing_users_infos_in_systeme():
+    user_infos = get_user_information()
+    user_infos["api_key"] = return_api_key("OPENAI_API_KEY")
+    missing_infos = []
+    for key, value in user_infos.items():
+        if value is None:
+            missing_infos.append({key: value})
+    return missing_infos
+
+
+def display_missing_users_infos():
+    missing_infos = return_missing_users_infos_in_systeme()
+    if len(missing_infos) > 0:
+        st.error(f"Certaines valeurs sont manquantes: n\ ")
+
+
+# { k for k, v in missing_infos})
 
 
 # close the form when the close button is click
@@ -51,6 +70,8 @@ def save_user_informations(firstname: str, lastname: str, email: str):
         with open("sql/save_user_informations.sql", "r") as f:
             sql = f.read()
         cursor.execute(sql, (firstname, lastname, email))
+        conn.commit()
+        st.success("Your personnal informations are saved in database")
         return True
     except sqlite3.OperationalError as error:
         print(f"erreur lors de la sauvegarde des informations utilisateurs {error}")
@@ -66,11 +87,25 @@ def get_user_information():
         cursor = conn.cursor()
         with open("sql/get_user_informations.sql", "r") as f:
             sql = f.read()
-        cursor.execute(sql)
-        row = cursor.fetchone()
-        return row
+        cursor.execute(sql, (1,))
+        row = cursor.fetchall()
+        row = row[0]
+        print(f"row,: {row}")
+
+        if row is None:
+            return {"id": None, "firstname": None, "lastname": None, "email": None}
+
+        user_infos = {
+            "id": row[0],
+            "firstname": row[1],
+            "lastname": row[2],
+            "email": row[3],
+        }
+        return user_infos
+
     except sqlite3.OperationalError as error:
-        print(f"erreur lors de la récuperation des informations utilisateur {error}")
+        print(f"Erreur lors de la récupération des informations utilisateur : {error}")
+        return {"id": None, "firstname": None, "lastname": None, "email": None}
 
     finally:
         cursor.close()
