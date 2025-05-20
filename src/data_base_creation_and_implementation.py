@@ -3,7 +3,7 @@ import sqlite3
 
 def create_empty_sqlite_database():
     try:
-        with sqlite3.connect("prospection.db") as conn:
+        with sqlite3.connect("Prospection.db") as conn:
             print(
                 f"création de la base de données avec la version {sqlite3.sqlite_version}"
             )
@@ -13,7 +13,7 @@ def create_empty_sqlite_database():
 
 def create_connection():
     try:
-        conn = sqlite3.connect("prospection.db")
+        conn = sqlite3.connect("Prospection.db")
         return conn
     except sqlite3.OperationalError as error:
         print(f"impossible de se connecter à la base de donnée  erreur {error}")

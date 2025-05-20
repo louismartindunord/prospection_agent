@@ -2,7 +2,8 @@
 
 SELECT 
     id,
-    firstname TEXT, 
-    lastname TEXT, 
-    email TEXT NOT NULL UNIQUE 
+    firstname, 
+    lastname, 
+    email  
 FROM User_infos
+WHERE id = ?
