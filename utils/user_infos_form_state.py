@@ -16,6 +16,11 @@ def is_user_information_form_active():
         return False
 
 
+def close_user_information_form():
+    st.session_state["user_information_form_active"] = None
+    st.rerun()
+
+
 def return_missing_users_infos_in_systeme():
     user_infos = get_user_information()
     user_infos["api_key"] = return_api_key("OPENAI_API_KEY")
@@ -36,9 +41,6 @@ def display_missing_users_infos():
 
 
 # close the form when the close button is click
-def close_user_information_form():
-    st.session_state["user_information_form_active"] = None
-    st.rerun()
 
 
 def check_email(email: str) -> bool:
@@ -100,6 +102,9 @@ def get_user_information():
             "firstname": row[1],
             "lastname": row[2],
             "email": row[3],
+            "compagny_type": row[4],
+            "compagny_activity": row[5],
+            "compagny_large_activity": row[6],
         }
         return user_infos
 
