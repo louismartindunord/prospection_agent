@@ -4,6 +4,9 @@ SELECT
     id,
     firstname, 
     lastname, 
-    email  
+    email,
+    compagny_type,
+    activity,
+    activity_large_description
 FROM User_infos
 WHERE id = ?
