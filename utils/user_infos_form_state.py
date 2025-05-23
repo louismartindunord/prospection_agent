@@ -21,8 +21,8 @@ def close_user_information_form():
     st.rerun()
 
 
-def return_missing_users_infos_in_systeme():
-    user_infos = get_user_information()
+def return_missing_users_infos_in_systeme(user_id):
+    user_infos = get_user_information(user_id)
     user_infos["api_key"] = return_api_key("OPENAI_API_KEY")
     missing_infos = []
     for key, value in user_infos.items():
@@ -31,10 +31,13 @@ def return_missing_users_infos_in_systeme():
     return missing_infos
 
 
-def display_missing_users_infos():
-    missing_infos = return_missing_users_infos_in_systeme()
+def display_missing_users_infos(user_id):
+    missing_infos = return_missing_users_infos_in_systeme(user_id)
     if len(missing_infos) > 0:
-        st.error(f"Certaines valeurs sont manquantes: n\ ")
+        st.page_link(
+            "pages/User_infos.py",
+            label="Veuillez remplir vos informations personelles  ",
+        )
 
 
 # { k for k, v in missing_infos})
@@ -65,13 +68,32 @@ def check_openai_key(open_ai_key: str) -> bool:
         return True
 
 
-def save_user_informations(firstname: str, lastname: str, email: str):
+def save_user_informations(
+    id: int,
+    firstname: str,
+    lastname: str,
+    email: str,
+    compagny_type: str,
+    activity: str,
+    activity_large_description: str,
+):
     try:
         conn = create_connection()
         cursor = conn.cursor()
-        with open("sql/save_user_informations.sql", "r") as f:
+        with open("sql/update_user_infos.sql", "r") as f:
             sql = f.read()
-        cursor.execute(sql, (firstname, lastname, email))
+        cursor.execute(
+            sql,
+            (
+                firstname,
+                lastname,
+                email,
+                compagny_type,
+                activity,
+                activity_large_description,
+                id,
+            ),
+        )
         conn.commit()
         st.success("Your personnal informations are saved in database")
         return True
@@ -83,28 +105,35 @@ def save_user_informations(firstname: str, lastname: str, email: str):
         conn.close()
 
 
-def get_user_information():
+def get_user_information(user_id: int):
     try:
         conn = create_connection()
         cursor = conn.cursor()
         with open("sql/get_user_informations.sql", "r") as f:
             sql = f.read()
-        cursor.execute(sql, (1,))
+        cursor.execute(sql, (user_id,))
         row = cursor.fetchall()
-        row = row[0]
-        print(f"row,: {row}")
+        if not row:
+            print(f"Aucun utilisateur trouvé avec l'ID {user_id}")
+            return {
+                "id": None,
+                "firstname": None,
+                "lastname": None,
+                "email": None,
+                "compagny_type": None,
+                "compagny_activity": None,
+                "compagny_large_activity": None,
+            }
 
-        if row is None:
-            return {"id": None, "firstname": None, "lastname": None, "email": None}
-
+        data = [element for elements in row for element in elements]
         user_infos = {
-            "id": row[0],
-            "firstname": row[1],
-            "lastname": row[2],
-            "email": row[3],
-            "compagny_type": row[4],
-            "compagny_activity": row[5],
-            "compagny_large_activity": row[6],
+            "id": data[0],
+            "firstname": data[1],
+            "lastname": data[2],
+            "email": data[3],
+            "compagny_type": data[4],
+            "compagny_activity": data[5],
+            "compagny_large_activity": data[6],
         }
         return user_infos
 

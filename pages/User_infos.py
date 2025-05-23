@@ -17,7 +17,7 @@ from utils.connection import insert_key_in_env_file, verify_presence_of_api_key
 
 
 def main():
-    user_infos = get_user_information()
+    user_infos = st.session_state["user_infos"]
 
     if is_user_information_form_active():
         display_user_personnal_info_form(user_infos=user_infos)
