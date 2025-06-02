@@ -4,6 +4,7 @@ from agents.agent_parser.find_compagny_type_parser import society_type_parser
 from langchain_core.prompts import PromptTemplate
 from langchain_mistralai import ChatMistralAI
 from langchain_core.runnables import RunnableLambda
+import pandas as pd
 
 
 import os
@@ -55,15 +56,28 @@ def agent_to_find_market_of_activity():
     )
 
     res = chain.invoke({"work_description": actity_infos})
-    print(res[0])
-    print(res[1])
+
     # print(f"le type de  res.companies :{type(res.companies)} ")
     # print(f"le nombre d'element res.companies :{len(res.companies)} ")
-    return res
+    return res, chain
 
 
-
- def transform_agent_to_find_market_output_into_editable_df():
+def transform_agent_to_find_market_output_into_editable_df():
     compagnies = agent_to_find_market_of_activity()
-    #
 
+    # Si compagnies est déjà une liste de dicts, on peut créer le DataFrame directement
+    df = pd.DataFrame(compagnies)
+
+    # Renommer les colonnes pour correspondre à ton affichage
+    df = df.rename(
+        columns={
+            "society": "Society",
+            "number_of_employe": "Nbr Employés",
+            "business_model_type": "Business Model",
+            "decision_makers": "Rôles Décisionnaires",
+        }
+    )
+
+    # Éviter les doublons exacts
+    print(df.head())
+    return df
